@@ -2430,7 +2430,8 @@ static __latent_entropy struct task_struct *copy_process(
 	uprobe_copy_process(p, clone_flags);
 
 	copy_oom_score_adj(clone_flags, p);
-
+    
+    p->planned_counter = 0;
 	return p;
 
 bad_fork_cancel_cgroup:

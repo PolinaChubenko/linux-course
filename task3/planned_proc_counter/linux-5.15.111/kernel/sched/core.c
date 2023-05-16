@@ -3555,6 +3555,7 @@ static void ttwu_do_wakeup(struct rq *rq, struct task_struct *p, int wake_flags,
 			   struct rq_flags *rf)
 {
 	check_preempt_curr(rq, p, wake_flags);
+    WRITE_ONCE(p->planned_counter, READ_ONCE(p->planned_counter) + 1);
 	WRITE_ONCE(p->__state, TASK_RUNNING);
 	trace_sched_wakeup(p);
 
@@ -4012,6 +4013,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 			goto out;
 
 		trace_sched_waking(p);
+        WRITE_ONCE(p->planned_counter, READ_ONCE(p->planned_counter) + 1);
 		WRITE_ONCE(p->__state, TASK_RUNNING);
 		trace_sched_wakeup(p);
 		goto out;
@@ -4497,6 +4499,7 @@ void wake_up_new_task(struct task_struct *p)
 	struct rq *rq;
 
 	raw_spin_lock_irqsave(&p->pi_lock, rf.flags);
+    WRITE_ONCE(p->planned_counter, READ_ONCE(p->planned_counter) + 1);
 	WRITE_ONCE(p->__state, TASK_RUNNING);
 #ifdef CONFIG_SMP
 	/*
@@ -6302,6 +6305,7 @@ static void __sched notrace __schedule(unsigned int sched_mode)
 	prev_state = READ_ONCE(prev->__state);
 	if (!(sched_mode & SM_MASK_PREEMPT) && prev_state) {
 		if (signal_pending_state(prev_state, prev)) {
+            WRITE_ONCE(prev->planned_counter, READ_ONCE(prev->planned_counter) + 1);
 			WRITE_ONCE(prev->__state, TASK_RUNNING);
 		} else {
 			prev->sched_contributes_to_load =
@@ -8353,6 +8357,7 @@ EXPORT_SYMBOL(__cond_resched_rwlock_write);
  */
 void __sched yield(void)
 {
+    WRITE_ONCE(current->planned_counter, READ_ONCE(current->planned_counter) + 1);
 	set_current_state(TASK_RUNNING);
 	do_sched_yield();
 }
@@ -8711,6 +8716,7 @@ void __init init_idle(struct task_struct *idle, int cpu)
 	raw_spin_lock_irqsave(&idle->pi_lock, flags);
 	raw_spin_rq_lock(rq);
 
+    WRITE_ONCE(idle->planned_counter, READ_ONCE(idle->planned_counter) + 1);
 	idle->__state = TASK_RUNNING;
 	idle->se.exec_start = sched_clock();
 	/*

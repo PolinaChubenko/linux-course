@@ -568,6 +568,15 @@ static int proc_oom_score(struct seq_file *m, struct pid_namespace *ns,
 	return 0;
 }
 
+static int proc_planned_counter(struct seq_file *m, struct pid_namespace *ns,
+			  struct pid *pid, struct task_struct *task)
+{
+	seq_printf(m, "%lu\n", task->planned_counter);
+	return 0;
+}
+
+
+
 struct limit_names {
 	const char *name;
 	const char *unit;
@@ -3274,6 +3283,7 @@ static const struct pid_entry tgid_base_stuff[] = {
 	ONE("cpu_resctrl_groups", S_IRUGO, proc_resctrl_show),
 #endif
 	ONE("oom_score",  S_IRUGO, proc_oom_score),
+    ONE("planned_counter", S_IRUGO, proc_planned_counter),
 	REG("oom_adj",    S_IRUGO|S_IWUSR, proc_oom_adj_operations),
 	REG("oom_score_adj", S_IRUGO|S_IWUSR, proc_oom_score_adj_operations),
 #ifdef CONFIG_AUDIT
@@ -3618,6 +3628,7 @@ static const struct pid_entry tid_base_stuff[] = {
 	ONE("cpu_resctrl_groups", S_IRUGO, proc_resctrl_show),
 #endif
 	ONE("oom_score", S_IRUGO, proc_oom_score),
+    ONE("planned_counter", S_IRUGO, proc_planned_counter),
 	REG("oom_adj",   S_IRUGO|S_IWUSR, proc_oom_adj_operations),
 	REG("oom_score_adj", S_IRUGO|S_IWUSR, proc_oom_score_adj_operations),
 #ifdef CONFIG_AUDIT

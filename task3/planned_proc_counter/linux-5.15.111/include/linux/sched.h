@@ -741,6 +741,7 @@ struct task_struct {
 
 	void				*stack;
 	refcount_t			usage;
+    unsigned long		planned_counter;
 	/* Per task flags (PF_*), defined further below: */
 	unsigned int			flags;
 	unsigned int			ptrace;
